@@ -29,7 +29,8 @@
 - Claude API専用プロキシサーバー
 - 自動ヘルスチェック機能
 - カスタマイズ可能なAPI優先順位設定
-
+## 🚀 デモ工
+https://education-html-app.vercel.app/
 ## 🚀 クイックスタート
 
 ### 前提条件チェック
