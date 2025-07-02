@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インテリジェント学習演示システム</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- インテリジェント学習システムロゴ -->
+    <div style="display: flex; justify-content: flex-start; align-items: center; margin-top: 20px; margin-bottom: 20px; margin-left: 20px;">
+      <svg width="60" height="60" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="16" width="28" height="48" rx="6" fill="#3B82F6" stroke="#2563EB" stroke-width="2"/>
+        <rect x="44" y="16" width="28" height="48" rx="6" fill="#60A5FA" stroke="#2563EB" stroke-width="2"/>
+        <path d="M12 24 Q22 32 40 24 Q58 32 68 24" stroke="#1E40AF" stroke-width="2" fill="none"/>
+        <path d="M12 56 Q22 48 40 56 Q58 48 68 56" stroke="#1E40AF" stroke-width="2" fill="none"/>
+        <rect x="38" y="16" width="4" height="48" rx="2" fill="#2563EB"/>
+        <circle cx="40" cy="40" r="6" fill="#fff" stroke="#2563EB" stroke-width="2"/>
+        <rect x="36" y="38" width="8" height="2" rx="1" fill="#2563EB"/>
+        <rect x="39" y="34" width="2" height="8" rx="1" fill="#2563EB"/>
+      </svg>
+    </div>
+
+    <div class="container">
+        <!-- AI API とモデル選択 - 右上に移動 -->
+        <div class="api-selector-top-right">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div class="api-selector">
+                    <label for="apiSelect">AI API:</label>
+                    <select id="apiSelect" onchange="onAPIChange()">
+                        <option value="ollama">Ollama (ローカル)</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="google">Google Gemini</option>
+                        <option value="claude">Claude</option>
+                    </select>
+                </div>
+                <div class="model-selector">
+                    <label for="modelSelect">モデル:</label>
+                    <select id="modelSelect" onchange="onModelChange()">
+                        <!-- 動的に入力 -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-panel">
+            <div class="chat-header">
+                <div class="header-controls">
+                    <div style="flex: 1;">
+                        <h1 id="chatTitle">🤖 インテリジェント学習アシスタント</h1>
+                        <p id="chatSubtitle">数学の質問をしてください。アニメーション付きの説明を生成します</p>
+                    </div>
+                    <button class="language-toggle" onclick="switchToChinese()">
+                        <span>中文</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message" id="welcomeMessage">
+                    こんにちは！私はあなたのインテリジェント学習アシスタントです。「ピタゴラスの定理を演示」「二次関数を説明」「円の面積公式とは」などの数学の質問をしてください。詳細な説明とアニメーション演示を生成します。
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="質問を入力してください..." onkeypress="handleKeyPress(event)">
+                <button class="send-btn" id="sendButton" onclick="sendMessage()">送信</button>
+            </div>
+        </div>
+        
+        <div class="demo-panel">
+            <div class="demo-header">
+                <h2 class="demo-title" id="demoTitle">数学アニメーション演示</h2>
+                <button class="home-btn" id="homeBtn" onclick="goHome()" style="display: none;">🏠 ホーム</button>
+            </div>
+
+            <div class="demo-content" id="demoContent">
+                <div class="welcome-screen">
+                    <div class="welcome-title" id="welcomeTitle">インテリジェント学習システムへようこそ！</div>
+                    <div class="welcome-text" id="welcomeText">左側のチャットボックスで質問すると、ここに対応するアニメーション演示が表示されます</div>
+
+                    <div class="knowledge-points-section">
+                        <h3 class="section-title">知識ポイントを選択</h3>
+                        <div class="knowledge-grid">
+                            <button class="knowledge-btn" onclick="quickQuestionByType('pythagorean')">
+                                <div class="knowledge-icon">📐</div>
+                                <div class="knowledge-title" id="btn1">ピタゴラスの定理</div>
+                                <div class="knowledge-desc">a² + b² = c²</div>
+                            </button>
+
+                            <button class="knowledge-btn" onclick="quickQuestionByType('circle')">
+                                <div class="knowledge-icon">⭕</div>
+                                <div class="knowledge-title" id="btn2">円の面積</div>
+                                <div class="knowledge-desc">A = πr²</div>
+                            </button>
+
+                            <button class="knowledge-btn" onclick="quickQuestionByType('quadratic')">
+                                <div class="knowledge-icon">📈</div>
+                                <div class="knowledge-title" id="btn3">二次関数</div>
+                                <div class="knowledge-desc">y = ax² + bx + c</div>
+                            </button>
+
+                            <button class="knowledge-btn" onclick="quickQuestionByType('trigonometry')">
+                                <div class="knowledge-icon">📊</div>
+                                <div class="knowledge-title" id="btn4">三角関数</div>
+                                <div class="knowledge-desc">sin, cos, tan</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="or-divider">
+                        <span class="or-text">または</span>
+                    </div>
+
+                    <div class="chat-prompt">
+                        <div class="chat-prompt-icon">💬</div>
+                        <div class="chat-prompt-text">左側のチャットボックスに質問を入力してください</div>
+                    </div>
+
+                    <div class="welcome-animation">
+                        <div class="floating-icon">🔢</div>
+                        <div class="floating-icon">∑</div>
+                        <div class="floating-icon">∫</div>
+                        <div class="floating-icon">√</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 日本語ページの言語設定を強制的に設定
+        window.pageLanguage = 'ja';
+        currentLanguage = 'ja';
+
+        // 動的にJavaScriptファイルを読み込み、タイムスタンプでキャッシュを防ぐ
+        const timestamp = Date.now();
+
+        // 最初に環境変数ローダーを読み込み
+        const envScript = document.createElement('script');
+        envScript.src = 'env-loader.js?t=' + timestamp;
+        document.head.appendChild(envScript);
+
+        // 次にconfig.jsを読み込み
+        envScript.onload = function() {
+            console.log('env-loader.js が読み込まれました');
+            const configScript = document.createElement('script');
+            configScript.src = 'config.js?t=' + timestamp;
+            document.head.appendChild(configScript);
+
+            // script.jsを読み込み（config.jsの読み込み完了を待つ）
+            configScript.onload = async function() {
+                console.log('config.js が読み込まれました');
+
+                // 環境変数を読み込み
+                if (window.loadEnvironmentVariables) {
+                    await window.loadEnvironmentVariables();
+                }
+
+                const mainScript = document.createElement('script');
+                mainScript.src = 'script.js?t=' + timestamp;
+                document.head.appendChild(mainScript);
+
+                // API設定マネージャーの読み込み完了を確認してから選択器を初期化
+                setTimeout(function() {
+                    if (window.apiConfigManager) {
+                        console.log('API選択器を初期化中...');
+                        initializeAPISelector();
+                    } else {
+                        console.error('API設定マネージャーがまだ読み込まれていません');
+                        // 再試行
+                        setTimeout(function() {
+                            if (window.apiConfigManager) {
+                                console.log('遅延API選択器初期化...');
+                                initializeAPISelector();
+                            } else {
+                                console.error('API設定マネージャーが最終的に読み込まれませんでした');
+                            }
+                        }, 500);
+                    }
+                }, 200);
+            };
+        };
+    </script>
+    <style>
+        /* API選択器スタイル - 右上角に配置 */
+        .api-selector-top-right {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .api-selector-top-right .api-selector,
+        .api-selector-top-right .model-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .api-selector-top-right .api-selector label,
+        .api-selector-top-right .model-selector label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .api-selector-top-right .api-selector select,
+        .api-selector-top-right .model-selector select {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 13px;
+            min-width: 120px;
+            cursor: pointer;
+        }
+
+        .api-selector-top-right .api-selector select:focus,
+        .api-selector-top-right .model-selector select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+
+        .api-selector-top-right .api-selector select:hover,
+        .api-selector-top-right .model-selector select:hover {
+            border-color: #007bff;
+        }
+
+        /* レスポンシブデザイン */
+        @media (max-width: 768px) {
+            .api-selector-top-right {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 10px;
+                justify-content: center;
+            }
+        }
+    </style>
+
+    <script>
+        // 日本語ページの言語設定を強制的に設定
+        window.pageLanguage = 'ja';
+
+        // API選択器関連関数
+        function initializeAPISelector() {
+            if (!window.apiConfigManager) {
+                console.error('API設定マネージャーが読み込まれていません');
+                return;
+            }
+
+            // デフォルト選択のAPIを設定
+            const apiSelect = document.getElementById('apiSelect');
+            apiSelect.value = window.apiConfigManager.defaultAPI;
+
+            // モデル選択器を初期化
+            updateModelSelector();
+        }
+
+        function updateModelSelector() {
+            const apiSelect = document.getElementById('apiSelect');
+            const modelSelect = document.getElementById('modelSelect');
+
+            if (!apiSelect || !modelSelect) {
+                console.error('API選択器またはモデル選択器要素が見つかりません');
+                return;
+            }
+
+            const selectedAPI = apiSelect.value;
+            console.log('モデル選択器を更新、現在のAPI:', selectedAPI);
+
+            if (!window.apiConfigManager || !window.apiConfigManager.configs[selectedAPI]) {
+                console.error('API設定マネージャーまたは設定が見つかりません:', selectedAPI);
+                return;
+            }
+
+            const config = window.apiConfigManager.configs[selectedAPI];
+            const availableModels = config.availableModels || [config.model];
+            console.log('利用可能なモデル:', availableModels);
+
+            // 既存のオプションをクリア
+            modelSelect.innerHTML = '';
+
+            // 利用可能なモデルを追加
+            availableModels.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                if (model === config.model) {
+                    option.selected = true;
+                }
+                modelSelect.appendChild(option);
+            });
+
+            console.log('モデル選択器が更新されました、オプション数:', modelSelect.options.length);
+        }
+
+        function onAPIChange() {
+            const apiSelect = document.getElementById('apiSelect');
+            const selectedAPI = apiSelect.value;
+
+            // デフォルトAPIに設定
+            if (window.apiConfigManager) {
+                window.apiConfigManager.setDefaultAPI(selectedAPI);
+                updateModelSelector();
+                console.log(`${selectedAPI} APIに切り替えました`);
+            }
+        }
+
+        function onModelChange() {
+            const apiSelect = document.getElementById('apiSelect');
+            const modelSelect = document.getElementById('modelSelect');
+            const selectedAPI = apiSelect.value;
+            const selectedModel = modelSelect.value;
+
+            // APIのモデルを設定
+            if (window.apiConfigManager) {
+                window.apiConfigManager.setAPIModel(selectedAPI, selectedModel);
+                console.log(`${selectedAPI} のモデルを ${selectedModel} に設定しました`);
+            }
+        }
+
+        // 中国語版に切り替え
+        function switchToChinese() {
+            window.location.href = 'learning_system_zh.html';
+        }
+
+        // 言語初期化はscript.jsのDOMContentLoadedイベントで処理、重複呼び出しを回避
+    </script>
+</body>
+</html>

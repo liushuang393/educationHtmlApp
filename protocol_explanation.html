@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロトコルの違いの説明</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .protocol-box { border: 2px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .file-protocol { border-color: #e74c3c; background: #fdf2f2; }
+        .http-protocol { border-color: #27ae60; background: #f2fdf2; }
+        .code { background: #f4f4f4; padding: 10px; border-radius: 4px; font-family: monospace; }
+        .warning { color: #e74c3c; font-weight: bold; }
+        .success { color: #27ae60; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>なぜWebサーバーが必要なのか？</h1>
+    
+    <div class="protocol-box file-protocol">
+        <h2>❌ ファイルプロトコル (file://)</h2>
+        <div class="code">file:///path/to/your/index.html</div>
+        <p><span class="warning">問題点：</span></p>
+        <ul>
+            <li>ブラウザのセキュリティ制限により、外部APIへのリクエストが制限される</li>
+            <li>CORS (Cross-Origin Resource Sharing) が厳しく制限される</li>
+            <li>JavaScriptのfetch APIが正常に動作しない場合がある</li>
+            <li>ローカルファイルシステムからネットワークAPIへのアクセスが制限される</li>
+        </ul>
+    </div>
+
+    <div class="protocol-box http-protocol">
+        <h2>✅ HTTPプロトコル (http://)</h2>
+        <div class="code">http://localhost:8000/index.html</div>
+        <p><span class="success">利点：</span></p>
+        <ul>
+            <li>ブラウザが「Webサイト」として認識し、通常のWeb APIアクセスが可能</li>
+            <li>CORS設定が適切に動作する</li>
+            <li>fetch APIが正常に動作する</li>
+            <li>本番環境と同じ動作環境でテストできる</li>
+        </ul>
+    </div>
+
+    <h2>🔧 Webサーバーの起動方法</h2>
+    
+    <h3>方法1: Python内蔵サーバー</h3>
+    <div class="code">
+# htmlAppフォルダに移動
+cd /path/to/htmlApp
+
+# Python 3の場合
+python3 -m http.server 8000
+
+# Python 2の場合
+python -m SimpleHTTPServer 8000
+    </div>
+
+    <h3>方法2: Node.js (http-server)</h3>
+    <div class="code">
+# http-serverをインストール
+npm install -g http-server
+
+# サーバー起動
+http-server -p 8000
+    </div>
+
+    <h3>方法3: PHP内蔵サーバー</h3>
+    <div class="code">
+php -S localhost:8000
+    </div>
+
+    <h2>🌐 アクセス方法</h2>
+    <p>サーバー起動後、ブラウザで以下のURLにアクセス：</p>
+    <div class="code">http://localhost:8000</div>
+
+    <h2>🔍 現在の状況確認</h2>
+    <div id="current-protocol"></div>
+    
+    <script>
+        // 現在のプロトコルを表示
+        const protocol = window.location.protocol;
+        const protocolDiv = document.getElementById('current-protocol');
+        
+        if (protocol === 'file:') {
+            protocolDiv.innerHTML = `
+                <div class="protocol-box file-protocol">
+                    <h3>⚠️ 現在のプロトコル: ${protocol}</h3>
+                    <p>このページは現在ファイルプロトコルで開かれています。</p>
+                    <p><strong>推奨：</strong> Webサーバーを起動してhttp://localhost:8000でアクセスしてください。</p>
+                </div>
+            `;
+        } else {
+            protocolDiv.innerHTML = `
+                <div class="protocol-box http-protocol">
+                    <h3>✅ 現在のプロトコル: ${protocol}</h3>
+                    <p>このページは正しくHTTPプロトコルで開かれています。</p>
+                    <p>API呼び出しが正常に動作するはずです。</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
